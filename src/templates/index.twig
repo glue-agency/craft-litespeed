@@ -1,0 +1,45 @@
+{% extends 'litespeed/_layouts/index' %}
+
+{% import '_includes/forms' as forms %}
+
+{% set selectedTab = 'url' %}
+
+{% block content %}
+    <form method="post" accept-charset="UTF-8">
+        {{ csrfInput() }}
+        {{ actionInput('litespeed/purge/url') }}
+        {{ redirectInput('litespeed') }}
+
+        {{ forms.editableTableField({
+            first: true,
+            label: 'URLs to purge'|t('litespeed'),
+            instructions: 'The full URL of each page to clear from the cache.'|t('litespeed'),
+            name: 'urls',
+            cols: {
+                url: {
+                    type: 'singleline',
+                    heading: 'URL'|t('litespeed'),
+                    placeholder: siteUrl('page-to-purge'),
+                    code: true,
+                },
+            },
+            rows: [{ url: '' }],
+            allowAdd: true,
+            allowDelete: true,
+            allowReorder: false,
+            addRowLabel: 'Add a URL'|t('litespeed'),
+        }) }}
+
+        {{ forms.checkboxField({
+            label: 'Purge all sub-pages'|t('litespeed'),
+            name: 'subpages',
+            value: 1,
+            checked: false,
+            warning: 'Every page below these URLs is purged as well, and has to be rendered again on its next visit.'|t('litespeed'),
+        }) }}
+
+        <div class="buttons">
+            <button type="submit" class="btn submit">{{ 'Purge'|t('litespeed') }}</button>
+        </div>
+    </form>
+{% endblock %}

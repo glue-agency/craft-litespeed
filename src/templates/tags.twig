@@ -1,0 +1,39 @@
+{% extends 'litespeed/_layouts/index' %}
+
+{% import '_includes/forms' as forms %}
+
+{% requirePermission 'litespeed:purgeTags' %}
+
+{% set selectedTab = 'tags' %}
+
+{% block content %}
+    <form method="post" accept-charset="UTF-8">
+        {{ csrfInput() }}
+        {{ actionInput('litespeed/purge/tags') }}
+        {{ redirectInput('litespeed/tags') }}
+
+        {{ forms.editableTableField({
+            first: true,
+            label: 'Tags to purge'|t('litespeed'),
+            instructions: 'Every page marked with one of these tags is cleared from the cache.'|t('litespeed'),
+            name: 'tags',
+            cols: {
+                tag: {
+                    type: 'singleline',
+                    heading: 'Tag'|t('litespeed'),
+                    placeholder: 'news',
+                    code: true,
+                },
+            },
+            rows: [{ tag: '' }],
+            allowAdd: true,
+            allowDelete: true,
+            allowReorder: false,
+            addRowLabel: 'Add a tag'|t('litespeed'),
+        }) }}
+
+        <div class="buttons">
+            <button type="submit" class="btn submit">{{ 'Purge'|t('litespeed') }}</button>
+        </div>
+    </form>
+{% endblock %}

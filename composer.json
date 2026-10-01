@@ -1,0 +1,61 @@
+{
+    "name": "glue-agency/craft-litespeed",
+    "description": "LiteSpeed Cache (LSCache) integration for Craft CMS: tag-based purging, cache control and vary",
+    "type": "craft-plugin",
+    "license": "mit",
+    "keywords": [
+        "craft",
+        "craftcms",
+        "craft-plugin",
+        "litespeed",
+        "lscache",
+        "cache"
+    ],
+    "support": {
+        "email": "support@glue.be",
+        "docs": "https://github.com/glue-agency/craft-litespeed/blob/master/README.md",
+        "issues": "https://github.com/glue-agency/craft-litespeed/issues",
+        "source": "https://github.com/glue-agency/craft-litespeed"
+    },
+    "require": {
+        "php": "^8.2",
+        "craftcms/cms": "^5.2.0"
+    },
+    "require-dev": {
+        "craftcms/ecs": "dev-main",
+        "phpunit/phpunit": "^10.1 || ^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "GlueAgency\\LiteSpeed\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "GlueAgency\\LiteSpeed\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "handle": "litespeed",
+        "name": "LiteSpeed",
+        "developer": "Glue Agency",
+        "developerUrl": "https://www.glue.be",
+        "documentationUrl": "https://github.com/glue-agency/craft-litespeed/blob/master/README.md",
+        "changelogUrl": "https://raw.githubusercontent.com/glue-agency/craft-litespeed/master/CHANGELOG.md",
+        "class": "GlueAgency\\LiteSpeed\\LiteSpeed"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "check-cs": "ecs check --ansi",
+        "fix-cs": "ecs check --fix --ansi"
+    }
+}

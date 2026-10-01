@@ -1,0 +1,14 @@
+{% extends '_layouts/cp' %}
+
+{% set title = 'Purge LiteSpeed cache'|t('litespeed') %}
+{% set selectedSubnavItem = 'purge' %}
+
+{% set tabs = {
+    url: { label: 'URL'|t('litespeed'), url: url('litespeed') },
+} %}
+
+{% if currentUser.can('litespeed:purgeTags') %}
+    {% set tabs = tabs|merge({
+        tags: { label: 'Tags'|t('litespeed'), url: url('litespeed/tags') },
+    }) %}
+{% endif %}

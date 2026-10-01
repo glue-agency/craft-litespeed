@@ -1,0 +1,173 @@
+{% import '_includes/forms' as forms %}
+
+{% set overrideWarning = 'This is overridden by config/litespeed.php.'|t('litespeed') %}
+
+<div id="general">
+    {% namespace 'settings' %}
+        {{ forms.booleanMenuField({
+            first: true,
+            label: 'Enabled'|t('litespeed'),
+            instructions: 'Whether LiteSpeed headers are sent at all.'|t('litespeed'),
+            id: 'enabled',
+            name: 'enabled',
+            value: settings.enabled is same as(true) ? '1' : settings.enabled,
+            includeEnvVars: true,
+            disabled: 'enabled' in overrides,
+            warning: 'enabled' in overrides ? overrideWarning,
+        }) }}
+
+        {{ forms.autosuggestField({
+            label: 'Tag prefix'|t('litespeed'),
+            instructions: 'Letters and digits only. Leave blank to use the one derived from this install.'|t('litespeed'),
+            placeholder: settings.getTagPrefix(),
+            id: 'tagPrefix',
+            name: 'tagPrefix',
+            value: settings.tagPrefix,
+            suggestEnvVars: true,
+            disabled: 'tagPrefix' in overrides,
+            warning: 'tagPrefix' in overrides ? overrideWarning : 'Pages cached under the old prefix can’t be purged any more once it changes; they live until their TTL runs out.'|t('litespeed'),
+            errors: settings.getErrors('tagPrefix'),
+        }) }}
+    {% endnamespace %}
+</div>
+
+<div id="caching" class="hidden">
+    {% namespace 'settings' %}
+        {{ forms.textField({
+            label: 'Cache lifetime'|t('litespeed'),
+            instructions: 'How long LiteSpeed keeps a page, in seconds. Element changes purge it sooner.'|t('litespeed'),
+            id: 'ttl',
+            name: 'ttl',
+            type: 'number',
+            min: 0,
+            size: 8,
+            value: settings.ttl,
+            disabled: 'ttl' in overrides,
+            warning: 'ttl' in overrides ? overrideWarning,
+            errors: settings.getErrors('ttl'),
+        }) }}
+
+        {% set statusRows = [] %}
+        {% for status, ttl in settings.statusTtls %}
+            {% set statusRows = statusRows|merge([{ status: status, ttl: ttl }]) %}
+        {% endfor %}
+
+        {{ forms.editableTableField({
+            label: 'Cached error pages'|t('litespeed'),
+            instructions: 'Lifetimes for responses other than 200, in seconds. Any status not listed is never cached.'|t('litespeed'),
+            id: 'statusTtls',
+            name: 'statusTtls',
+            cols: {
+                status: { type: 'number', heading: 'Status code'|t('litespeed'), thin: true },
+                ttl: { type: 'number', heading: 'Lifetime'|t('litespeed') },
+            },
+            rows: statusRows,
+            allowAdd: true,
+            allowDelete: true,
+            static: 'statusTtls' in overrides,
+            warning: 'statusTtls' in overrides ? overrideWarning,
+            errors: settings.getErrors('statusTtls'),
+        }) }}
+
+        {{ forms.editableTableField({
+            label: 'Excluded paths'|t('litespeed'),
+            instructions: 'Regular expressions matched against the path, without leading slash. A matching page is never cached.'|t('litespeed'),
+            id: 'excludeUris',
+            name: 'excludeUris',
+            cols: {
+                pattern: { type: 'singleline', heading: 'Pattern'|t('litespeed'), placeholder: '^nl/zoeken', code: true },
+            },
+            rows: settings.excludeUris|map(pattern => { pattern: pattern }),
+            allowAdd: true,
+            allowDelete: true,
+            static: 'excludeUris' in overrides,
+            warning: 'excludeUris' in overrides ? overrideWarning,
+            errors: settings.getErrors('excludeUris'),
+        }) }}
+    {% endnamespace %}
+</div>
+
+<div id="vary" class="hidden">
+    {% namespace 'settings' %}
+        {{ forms.lightswitchField({
+            label: 'Separate cache for logged-in users'|t('litespeed'),
+            instructions: 'Gives logged-in users a cookie of their own, so LiteSpeed never serves them a guest’s cached page.'|t('litespeed'),
+            id: 'varyLoggedIn',
+            name: 'varyLoggedIn',
+            on: settings.varyLoggedIn,
+            disabled: 'varyLoggedIn' in overrides,
+            warning: 'varyLoggedIn' in overrides ? overrideWarning,
+        }) }}
+
+        {{ forms.textField({
+            label: 'Logged-in cookie name'|t('litespeed'),
+            instructions: 'LiteSpeed varies on a cookie whose name starts with `_lscache_vary` by itself. Any other name needs `RewriteRule .* - [E="Cache-Vary:<name>"]` in `.htaccess`.'|t('litespeed'),
+            id: 'loggedInCookie',
+            name: 'loggedInCookie',
+            value: settings.loggedInCookie,
+            required: true,
+            code: true,
+            disabled: 'loggedInCookie' in overrides,
+            warning: 'loggedInCookie' in overrides ? overrideWarning,
+            errors: settings.getErrors('loggedInCookie'),
+        }) }}
+
+        {{ forms.editableTableField({
+            label: 'Vary cookies'|t('litespeed'),
+            instructions: 'Cookies whose value changes the page: a variant is cached per value. Add each one to `.htaccess` as well, with `RewriteRule .* - [E="Cache-Vary:<name>"]`, so LiteSpeed reads it before it serves a cached page.'|t('litespeed'),
+            id: 'varyCookies',
+            name: 'varyCookies',
+            cols: {
+                name: { type: 'singleline', heading: 'Cookie name'|t('litespeed'), placeholder: 'customer_group', code: true },
+            },
+            rows: settings.varyCookies|map(name => { name: name }),
+            allowAdd: true,
+            allowDelete: true,
+            static: 'varyCookies' in overrides,
+            warning: 'varyCookies' in overrides ? overrideWarning,
+            errors: settings.getErrors('varyCookies'),
+        }) }}
+    {% endnamespace %}
+</div>
+
+<div id="purging" class="hidden">
+    {% namespace 'settings' %}
+        {{ forms.lightswitchField({
+            label: 'Serve stale pages while purging'|t('litespeed'),
+            instructions: 'Visitors get the old copy of a purged page for a few seconds while it’s rendered again.'|t('litespeed'),
+            id: 'purgeStale',
+            name: 'purgeStale',
+            on: settings.purgeStale,
+            disabled: 'purgeStale' in overrides,
+            warning: 'purgeStale' in overrides ? overrideWarning,
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Purge after garbage collection'|t('litespeed'),
+            instructions: 'Craft’s garbage collection invalidates every element cache, without any content having changed.'|t('litespeed'),
+            id: 'purgeOnGc',
+            name: 'purgeOnGc',
+            on: settings.purgeOnGc,
+            disabled: 'purgeOnGc' in overrides,
+            warning: 'purgeOnGc' in overrides ? overrideWarning,
+        }) }}
+
+        {{ forms.editableTableField({
+            label: 'Relay URLs'|t('litespeed'),
+            instructions: 'Where purges from console commands and queue jobs are sent, so they pass through LiteSpeed. Each URL must answer the request itself, without a redirect. Leave empty to use each site’s base URL.'|t('litespeed'),
+            id: 'loopbackUrls',
+            name: 'loopbackUrls',
+            cols: {
+                url: { type: 'autosuggest', heading: 'URL'|t('litespeed'), suggestEnvVars: true, code: true },
+            },
+            rows: settings.loopbackUrls|map(url => { url: url }),
+            allowAdd: true,
+            allowDelete: true,
+            static: 'loopbackUrls' in overrides,
+            warning: 'loopbackUrls' in overrides ? overrideWarning,
+            errors: settings.getErrors('loopbackUrls'),
+        }) }}
+
+        <p class="light">{{ 'Options for that relay request, such as basic auth on a staging site, are set as `loopbackOptions` in `config/litespeed.php`.'|t('litespeed')|md(inlineOnly=true) }}</p>
+    {% endnamespace %}
+</div>
