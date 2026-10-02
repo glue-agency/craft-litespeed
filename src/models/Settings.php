@@ -71,7 +71,7 @@ class Settings extends Model
     public bool $purgeOnGc = true;
 
     /**
-     * URLs purges are relayed to when they happen outside a web response (console, queue).
+     * URLs purges are relayed to when they happen outside a web response (console, queue). Config file only.
      * Defaults to the base URL of the first site on each distinct host.
      *
      * @var string[]
@@ -119,9 +119,8 @@ class Settings extends Model
         }
 
         $columns = [
-            'excludeUris'  => 'pattern',
-            'varyCookies'  => 'name',
-            'loopbackUrls' => 'url',
+            'excludeUris' => 'pattern',
+            'varyCookies' => 'name',
         ];
 
         foreach ($columns as $key => $column) {

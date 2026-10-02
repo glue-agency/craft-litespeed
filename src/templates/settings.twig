@@ -156,22 +156,6 @@
             warning: 'purgeOnGc' in overrides ? overrideWarning,
         }) }}
 
-        {{ forms.editableTableField({
-            label: 'Relay URLs'|t('litespeed'),
-            instructions: 'Purges from console commands and queue jobs reach LiteSpeed through each site’s base URL. Only add a URL here when LiteSpeed has to be reached on a different one, for example because the base URL redirects.'|t('litespeed'),
-            id: 'loopbackUrls',
-            name: 'loopbackUrls',
-            cols: {
-                url: { type: 'autosuggest', heading: 'URL'|t('litespeed'), suggestEnvVars: true, code: true },
-            },
-            rows: settings.loopbackUrls|map(url => { url: url }),
-            allowAdd: true,
-            allowDelete: true,
-            static: 'loopbackUrls' in overrides,
-            warning: 'loopbackUrls' in overrides ? overrideWarning,
-            errors: settings.getErrors('loopbackUrls'),
-        }) }}
-
-        <p class="light">{{ 'Options for that relay request, such as basic auth on a staging site, are set as `loopbackOptions` in `config/litespeed.php`.'|t('litespeed')|md(inlineOnly=true) }}</p>
+        <p class="light">{{ 'Purges from console commands and queue jobs reach LiteSpeed through each site’s base URL. Another URL (`loopbackUrls`) and options for that request, such as basic auth on a staging site (`loopbackOptions`), are set in `config/litespeed.php`.'|t('litespeed')|md(inlineOnly=true) }}</p>
     {% endnamespace %}
 </div>

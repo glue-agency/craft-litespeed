@@ -101,8 +101,13 @@ LiteSpeed only accepts a purge on a response it serves. In a web request the pur
 response itself. Console commands and queue jobs relay it with a request to each site's base URL; when that
 request fails, the purge is kept and the next web request sends it.
 
-The relay request goes through the public hostname, so give it whatever it needs to get through. For a staging
-site behind basic auth:
+The relay request goes to the first site URL of each host, so it passes through LiteSpeed the way a visitor
+does. Both relay settings are config-file only:
+
+- `loopbackUrls` replaces those URLs. Only set it when LiteSpeed has to be reached on another URL than the site's
+  base URL, for example because the base URL redirects: the relay doesn't follow redirects, and each URL must
+  answer the POST itself with a 204.
+- `loopbackOptions` are Guzzle options for the request, such as basic auth on a staging site.
 
 ```php
 // config/litespeed.php
@@ -110,6 +115,9 @@ return [
     '*' => [],
     'staging' => [
         'loopbackOptions' => ['auth' => ['dev', 'dev']],
+    ],
+    'production' => [
+        'loopbackUrls' => ['https://www.example.com/nl/'],
     ],
 ];
 ```
@@ -222,9 +230,9 @@ its tags.
 
 Everything below can be set under *LiteSpeed → Settings*, which admins see in the section's nav (*Settings →
 Plugins → LiteSpeed* leads there too). The CP saves to project config, so it's only editable where `allowAdminChanges` is on. To set a value per
-environment, enter an environment variable such as `$LITESPEED_ENABLED` or `$LITESPEED_TAG_PREFIX` (`enabled`,
-`tagPrefix` and the relay URLs accept one), or set it in `config/litespeed.php`, which overrides the CP: an
-overridden field is shown read-only. The relay's Guzzle options (`loopbackOptions`) and `maxHeaderLength` are config-file only.
+environment, enter an environment variable such as `$LITESPEED_ENABLED` or `$LITESPEED_TAG_PREFIX` (`enabled`
+and `tagPrefix` accept one), or set it in `config/litespeed.php`, which overrides the CP: an overridden field is
+shown read-only. The relay settings (`loopbackUrls`, `loopbackOptions`) and `maxHeaderLength` are config-file only.
 
 | Setting | Default | |
 |---|---|---|
@@ -238,7 +246,7 @@ overridden field is shown read-only. The relay's Guzzle options (`loopbackOption
 | `loggedInCookie` | `_lscache_vary` | Name of the logged-in users' vary cookie |
 | `purgeStale` | `false` | Serve the stale copy while a purged page regenerates |
 | `purgeOnGc` | `true` | Purge the whole site when Craft's garbage collection runs: `php craft gc`, a deploy, and about 1 in 100,000 requests that reach Craft (`gcProbability`) |
-| `loopbackUrls` | each host's first site URL | Where console and queue purges are relayed to. Only set it when LiteSpeed has to be reached on another URL than the site's base URL, e.g. because that redirects: the URL must answer the POST itself |
+| `loopbackUrls` | each host's first site URL | Where console and queue purges are relayed to, when LiteSpeed has to be reached on another URL than the site's base URL. Config file only |
 | `loopbackOptions` | `[]` | Guzzle options for that relay request, merged over a 10 second timeout and no redirects. Config file only |
 | `maxHeaderLength` | `8000` | Longest tag or purge header sent, in bytes. Config file only |
 

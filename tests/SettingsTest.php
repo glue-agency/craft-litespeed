@@ -17,7 +17,6 @@ class SettingsTest extends TestCase
             'statusTtls'     => [['status' => '404', 'ttl' => '600']],
             'excludeUris'    => '',
             'varyCookies'    => [['name' => 'customer_group'], ['name' => '']],
-            'loopbackUrls'   => [['url' => '$LITESPEED_RELAY_URL']],
             'loggedInCookie' => ' _lscache_vary ',
         ]);
 
@@ -28,7 +27,6 @@ class SettingsTest extends TestCase
             'statusTtls'     => [404 => 600],
             'excludeUris'    => [],
             'varyCookies'    => ['customer_group'],
-            'loopbackUrls'   => ['$LITESPEED_RELAY_URL'],
             'loggedInCookie' => '_lscache_vary',
         ], $normalized);
     }
@@ -48,6 +46,7 @@ class SettingsTest extends TestCase
             'excludeUris'  => ['^nl/zoeken'],
             'varyCookies'  => ['customer_group'],
             'varyLoggedIn' => false,
+            'loopbackUrls' => ['https://www.example.com/nl/'],
         ];
 
         $this->assertSame($values, Settings::normalize($values));
