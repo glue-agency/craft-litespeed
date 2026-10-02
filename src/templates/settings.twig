@@ -155,7 +155,5 @@
             disabled: 'purgeOnGc' in overrides,
             warning: 'purgeOnGc' in overrides ? overrideWarning,
         }) }}
-
-        <p class="light">{{ 'Purges from console commands and queue jobs reach LiteSpeed through each site’s base URL. Another URL (`loopbackUrls`) and options for that request, such as basic auth on a staging site (`loopbackOptions`), are set in `config/litespeed.php`.'|t('litespeed')|md(inlineOnly=true) }}</p>
     {% endnamespace %}
 </div>

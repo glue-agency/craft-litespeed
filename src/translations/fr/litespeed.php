@@ -58,7 +58,6 @@ return [
     'Visitors get the old copy of a purged page for a few seconds while it’s rendered again.' => 'Pendant quelques secondes, les visiteurs reçoivent l’ancienne version d’une page purgée, le temps qu’elle soit régénérée.',
     'Purge on garbage collection' => 'Purger lors du garbage collection',
     'Clears every page LiteSpeed cached for this site whenever Craft’s garbage collection runs, for example during a deploy.' => 'Efface du cache toutes les pages mises en cache par LiteSpeed pour ce site à chaque exécution du garbage collection de Craft, par exemple lors d’un déploiement.',
-    'Purges from console commands and queue jobs reach LiteSpeed through each site’s base URL. Another URL (`loopbackUrls`) and options for that request, such as basic auth on a staging site (`loopbackOptions`), are set in `config/litespeed.php`.' => 'Les purges lancées par les commandes de console et les tâches de la file d’attente atteignent LiteSpeed par l’URL de base de chaque site. Une autre URL (`loopbackUrls`) et les options de cette requête, comme l’authentification basique d’un site de préproduction (`loopbackOptions`), se définissent dans `config/litespeed.php`.',
     'Tags to purge' => 'Étiquettes à effacer du cache',
     'Every page marked with one of these tags is cleared from the cache.' => 'Toutes les pages portant l’une de ces étiquettes sont effacées du cache.',
     'Tag' => 'Étiquette',

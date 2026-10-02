@@ -58,7 +58,6 @@ return [
     'Visitors get the old copy of a purged page for a few seconds while it’s rendered again.' => 'Bezoekers zien nog een paar seconden de oude versie van een gewiste pagina terwijl die opnieuw opgebouwd wordt.',
     'Purge on garbage collection' => 'Cache wissen bij garbage collection',
     'Clears every page LiteSpeed cached for this site whenever Craft’s garbage collection runs, for example during a deploy.' => 'Wist elke pagina die LiteSpeed voor deze site in de cache bewaart, telkens wanneer de garbage collection van Craft draait, bijvoorbeeld tijdens een deploy.',
-    'Purges from console commands and queue jobs reach LiteSpeed through each site’s base URL. Another URL (`loopbackUrls`) and options for that request, such as basic auth on a staging site (`loopbackOptions`), are set in `config/litespeed.php`.' => 'Wisopdrachten van consolecommando’s en wachtrijtaken bereiken LiteSpeed via de basis-URL van elke site. Een andere URL (`loopbackUrls`) en opties voor dat verzoek, zoals basic auth op een stagingsite (`loopbackOptions`), worden ingesteld in `config/litespeed.php`.',
     'Tags to purge' => 'Te wissen tags',
     'Every page marked with one of these tags is cleared from the cache.' => 'Elke pagina met een van deze tags wordt uit de cache gewist.',
     'Tag' => 'Tag',
