@@ -158,7 +158,7 @@
 
         {{ forms.editableTableField({
             label: 'Relay URLs'|t('litespeed'),
-            instructions: 'Where purges from console commands and queue jobs are sent, so they pass through LiteSpeed. Each URL must answer the request itself, without a redirect. Leave empty to use each site’s base URL.'|t('litespeed'),
+            instructions: 'Purges from console commands and queue jobs reach LiteSpeed through each site’s base URL. Only add a URL here when LiteSpeed has to be reached on a different one, for example because the base URL redirects.'|t('litespeed'),
             id: 'loopbackUrls',
             name: 'loopbackUrls',
             cols: {

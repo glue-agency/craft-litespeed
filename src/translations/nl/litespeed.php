@@ -59,7 +59,7 @@ return [
     'Purge on garbage collection' => 'Cache wissen bij garbage collection',
     'Clears every page LiteSpeed cached for this site whenever Craft’s garbage collection runs, for example during a deploy.' => 'Wist elke pagina die LiteSpeed voor deze site in de cache bewaart, telkens wanneer de garbage collection van Craft draait, bijvoorbeeld tijdens een deploy.',
     'Relay URLs' => 'Doorstuur-URL’s',
-    'Where purges from console commands and queue jobs are sent, so they pass through LiteSpeed. Each URL must answer the request itself, without a redirect. Leave empty to use each site’s base URL.' => 'Waar wisopdrachten van consolecommando’s en wachtrijtaken naartoe gestuurd worden, zodat ze via LiteSpeed lopen. Elke URL moet het verzoek zelf beantwoorden, zonder doorverwijzing. Laat leeg om de basis-URL van elke site te gebruiken.',
+    'Purges from console commands and queue jobs reach LiteSpeed through each site’s base URL. Only add a URL here when LiteSpeed has to be reached on a different one, for example because the base URL redirects.' => 'Wisopdrachten van consolecommando’s en wachtrijtaken bereiken LiteSpeed via de basis-URL van elke site. Voeg hier alleen een URL toe als LiteSpeed via een andere URL bereikt moet worden, bijvoorbeeld omdat de basis-URL doorverwijst.',
     'Options for that relay request, such as basic auth on a staging site, are set as `loopbackOptions` in `config/litespeed.php`.' => 'Opties voor dat doorstuurverzoek, zoals basic auth op een stagingsite, worden ingesteld met `loopbackOptions` in `config/litespeed.php`.',
     'Tags to purge' => 'Te wissen tags',
     'Every page marked with one of these tags is cleared from the cache.' => 'Elke pagina met een van deze tags wordt uit de cache gewist.',

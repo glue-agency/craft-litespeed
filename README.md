@@ -238,7 +238,7 @@ overridden field is shown read-only. The relay's Guzzle options (`loopbackOption
 | `loggedInCookie` | `_lscache_vary` | Name of the logged-in users' vary cookie |
 | `purgeStale` | `false` | Serve the stale copy while a purged page regenerates |
 | `purgeOnGc` | `true` | Purge the whole site when Craft's garbage collection runs: `php craft gc`, a deploy, and about 1 in 100,000 requests that reach Craft (`gcProbability`) |
-| `loopbackUrls` | each host's first site URL | Where console and queue purges are relayed to. The URL must answer the POST itself, without a redirect |
+| `loopbackUrls` | each host's first site URL | Where console and queue purges are relayed to. Only set it when LiteSpeed has to be reached on another URL than the site's base URL, e.g. because that redirects: the URL must answer the POST itself |
 | `loopbackOptions` | `[]` | Guzzle options for that relay request, merged over a 10 second timeout and no redirects. Config file only |
 | `maxHeaderLength` | `8000` | Longest tag or purge header sent, in bytes. Config file only |
 
