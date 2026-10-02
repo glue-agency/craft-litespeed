@@ -248,7 +248,7 @@ class CacheService extends Component
     protected function sendTags(Request $request, Response $response, array $craftTags): bool
     {
         $settings = LiteSpeed::getInstance()->getSettings();
-        $prefix = $settings->getTagPrefix();
+        $prefix = $settings->getPrefix();
 
         $pageTags = Tags::forPage($prefix, $request->getHostName() ?? '', $this->path($request));
 

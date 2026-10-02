@@ -12,7 +12,7 @@ class SettingsTest extends TestCase
     {
         $normalized = Settings::normalize([
             'enabled'        => '1',
-            'tagPrefix'      => '  ',
+            'prefix'         => '  ',
             'ttl'            => '3600',
             'statusTtls'     => [['status' => '404', 'ttl' => '600']],
             'excludeUris'    => '',
@@ -22,7 +22,7 @@ class SettingsTest extends TestCase
 
         $this->assertSame([
             'enabled'        => true,
-            'tagPrefix'      => null,
+            'prefix'         => null,
             'ttl'            => 3600,
             'statusTtls'     => [404 => 600],
             'excludeUris'    => [],
@@ -40,7 +40,7 @@ class SettingsTest extends TestCase
     {
         $values = [
             'enabled'      => '$LITESPEED_ENABLED',
-            'tagPrefix'    => 'aquaduin',
+            'prefix'       => 'aquaduin',
             'ttl'          => 86400,
             'statusTtls'   => [404 => 3600],
             'excludeUris'  => ['^nl/zoeken'],
@@ -89,11 +89,11 @@ class SettingsTest extends TestCase
         $this->assertFalse(Settings::isValidExcludePattern('^nl/(zoeken'));
     }
 
-    public function testTheTagPrefixAvoidsLiteSpeedsReservedWords(): void
+    public function testThePrefixAvoidsLiteSpeedsReservedWords(): void
     {
-        $this->assertTrue(Settings::isValidTagPrefix('aquaduin2'));
-        $this->assertFalse(Settings::isValidTagPrefix('Public'));
-        $this->assertFalse(Settings::isValidTagPrefix('private'));
-        $this->assertFalse(Settings::isValidTagPrefix('aqua_duin'));
+        $this->assertTrue(Settings::isValidPrefix('aquaduin2'));
+        $this->assertFalse(Settings::isValidPrefix('Public'));
+        $this->assertFalse(Settings::isValidPrefix('private'));
+        $this->assertFalse(Settings::isValidPrefix('aqua_duin'));
     }
 }

@@ -230,14 +230,14 @@ its tags.
 
 Everything below can be set under *LiteSpeed → Settings*, which admins see in the section's nav (*Settings →
 Plugins → LiteSpeed* leads there too). The CP saves to project config, so it's only editable where `allowAdminChanges` is on. To set a value per
-environment, enter an environment variable such as `$LITESPEED_ENABLED` or `$LITESPEED_TAG_PREFIX` (`enabled`
-and `tagPrefix` accept one), or set it in `config/litespeed.php`, which overrides the CP: an overridden field is
+environment, enter an environment variable such as `$LITESPEED_ENABLED` or `$LITESPEED_PREFIX` (`enabled`
+and `prefix` accept one), or set it in `config/litespeed.php`, which overrides the CP: an overridden field is
 shown read-only. The relay settings (`loopbackUrls`, `loopbackOptions`) and `maxHeaderLength` are config-file only.
 
 | Setting | Default | |
 |---|---|---|
 | `enabled` | `true` | Send any LiteSpeed headers at all |
-| `tagPrefix` | hash of the system UID | Prefix for every tag, letters and digits only. It keeps purges from reaching other apps on the same vhost, so it must never change between deploys |
+| `prefix` | hash of the system UID | Prefix for every tag, letters and digits only. It keeps purges from reaching other apps on the same vhost, so it must never change between deploys |
 | `ttl` | `86400` | Public cache lifetime, in seconds |
 | `statusTtls` | `[404 => 3600]` | Lifetimes for non-200 responses, by status code. Any other status isn't cached |
 | `excludeUris` | `[]` | Regular expressions matched against the path (without leading slash) |
@@ -286,7 +286,7 @@ confirm, request the page again: `x-litespeed-cache: miss` means it was purged.
   cache hits, so LiteSpeed is never told to purge it. Set `'cache' => false` on endpoints LiteSpeed caches.
 - **Scheduled entries.** An entry whose post or expiry date passes isn't saved, so nothing purges it. Run
   `craft update-statuses` from cron (Craft 5.7+), which resaves them, or rely on the TTL.
-- **Copied databases.** The default tag prefix comes from the system UID, so a staging site built from a
+- **Copied databases.** The default prefix comes from the system UID, so a staging site built from a
   production database shares production's prefix. That's harmless while each runs on its own vhost; set
-  `tagPrefix` when two of them share one.
+  `prefix` when two of them share one.
 - **Not yet supported:** private cache for logged-in users and ESI. Logged-in users are never cached.

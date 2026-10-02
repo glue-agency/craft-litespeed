@@ -20,14 +20,14 @@
         {{ forms.autosuggestField({
             label: 'Tag prefix'|t('litespeed'),
             instructions: 'Letters and digits only. Leave blank to use the one derived from this install.'|t('litespeed'),
-            placeholder: settings.getTagPrefix(),
-            id: 'tagPrefix',
-            name: 'tagPrefix',
-            value: settings.tagPrefix,
+            placeholder: settings.getPrefix(),
+            id: 'prefix',
+            name: 'prefix',
+            value: settings.prefix,
             suggestEnvVars: true,
-            disabled: 'tagPrefix' in overrides,
-            warning: 'tagPrefix' in overrides ? overrideWarning : 'Pages cached under the old prefix can’t be purged any more once it changes; they live until their TTL runs out.'|t('litespeed'),
-            errors: settings.getErrors('tagPrefix'),
+            disabled: 'prefix' in overrides,
+            warning: 'prefix' in overrides ? overrideWarning : 'Pages cached under the old prefix can’t be purged any more once it changes; they live until their TTL runs out.'|t('litespeed'),
+            errors: settings.getErrors('prefix'),
         }) }}
     {% endnamespace %}
 </div>

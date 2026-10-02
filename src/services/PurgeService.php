@@ -371,6 +371,6 @@ class PurgeService extends Component
 
     protected function prefix(): string
     {
-        return LiteSpeed::getInstance()->getSettings()->getTagPrefix();
+        return LiteSpeed::getInstance()->getSettings()->getPrefix();
     }
 }

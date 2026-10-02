@@ -22,7 +22,7 @@ class Settings extends Model
      * Prefix for every tag this install sends, so a purge never reaches another app on the same
      * LiteSpeed vhost. Must stay the same across deploys. Defaults to a hash of the system UID.
      */
-    public ?string $tagPrefix = null;
+    public ?string $prefix = null;
 
     /**
      * Public cache lifetime, in seconds.
@@ -133,8 +133,8 @@ class Settings extends Model
             $values['enabled'] = $values['enabled'] === '1';
         }
 
-        if (array_key_exists('tagPrefix', $values)) {
-            $values['tagPrefix'] = trim((string) $values['tagPrefix']) ?: null;
+        if (array_key_exists('prefix', $values)) {
+            $values['prefix'] = trim((string) $values['prefix']) ?: null;
         }
 
         if (array_key_exists('loggedInCookie', $values)) {
@@ -162,7 +162,7 @@ class Settings extends Model
         return @preg_match(self::excludePattern($pattern), '') !== false;
     }
 
-    public static function isValidTagPrefix(string $prefix): bool
+    public static function isValidPrefix(string $prefix): bool
     {
         return preg_match('/^[A-Za-z0-9]+$/', $prefix) && ! in_array(strtolower($prefix), ['public', 'private'], true);
     }
@@ -172,18 +172,18 @@ class Settings extends Model
         return (bool) App::parseBooleanEnv($this->enabled);
     }
 
-    public function getTagPrefix(): string
+    public function getPrefix(): string
     {
-        $prefix = App::parseEnv($this->tagPrefix);
+        $prefix = App::parseEnv($this->prefix);
 
         if (empty($prefix)) {
-            return $this->defaultTagPrefix();
+            return $this->defaultPrefix();
         }
 
-        if (! self::isValidTagPrefix($prefix)) {
+        if (! self::isValidPrefix($prefix)) {
             Craft::error("Invalid LiteSpeed tag prefix “{$prefix}”, using the default one instead.", 'litespeed');
 
-            return $this->defaultTagPrefix();
+            return $this->defaultPrefix();
         }
 
         return $prefix;
@@ -216,7 +216,7 @@ class Settings extends Model
         return array_values($urls);
     }
 
-    protected function defaultTagPrefix(): string
+    protected function defaultPrefix(): string
     {
         return substr(md5(Craft::$app->getSystemUid() ?? Craft::$app->id), 0, 6);
     }
@@ -228,10 +228,10 @@ class Settings extends Model
             [['ttl'], 'integer', 'min' => 0],
             [['maxHeaderLength'], 'integer', 'min' => 1000],
             [['varyLoggedIn', 'purgeStale', 'purgeOnGc'], 'boolean'],
-            ['tagPrefix', function(string $attribute) {
+            ['prefix', function(string $attribute) {
                 $prefix = App::parseEnv($this->$attribute);
 
-                if (! empty($prefix) && ! self::isValidTagPrefix($prefix)) {
+                if (! empty($prefix) && ! self::isValidPrefix($prefix)) {
                     $this->addError($attribute, Craft::t('litespeed', 'The tag prefix may only contain letters and digits, and can’t be “public” or “private”.'));
                 }
             }],

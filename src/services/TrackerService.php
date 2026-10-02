@@ -89,7 +89,7 @@ class TrackerService extends Component
     public function forget(array $tags, bool $everything = false): void
     {
         try {
-            if ($everything || in_array(Tags::install(LiteSpeed::getInstance()->getSettings()->getTagPrefix()), $tags, true)) {
+            if ($everything || in_array(Tags::install(LiteSpeed::getInstance()->getSettings()->getPrefix()), $tags, true)) {
                 $this->forgetAll();
 
                 return;
