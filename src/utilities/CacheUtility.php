@@ -31,16 +31,38 @@ class CacheUtility extends Utility
 
     public static function contentHtml(): string
     {
-        $tracker = LiteSpeed::getInstance()->tracker;
+        $plugin = LiteSpeed::getInstance();
         $query = trim((string) Craft::$app->getRequest()->getQueryParam('q', ''));
 
         return Craft::$app->getView()->renderTemplate('litespeed/_utility', [
             'sites'    => Craft::$app->getSites()->getAllSites(),
-            'stats'    => $tracker->stats(),
+            'stats'    => $plugin->tracker->stats(),
             'query'    => $query,
-            'pages'    => $query === '' ? [] : $tracker->search($query, self::SEARCH_LIMIT),
+            'check'    => static::isPageReference($query) ? static::check($query) : null,
+            'pages'    => $query === '' ? [] : $plugin->tracker->search($query, self::SEARCH_LIMIT),
             'limit'    => self::SEARCH_LIMIT,
             'canPurge' => Craft::$app->getUser()->checkPermission(Permission::ACCESS_PLUGIN->value),
         ]);
+    }
+
+    /**
+     * A full URL or a path is checked live; anything else only searches the record.
+     */
+    protected static function isPageReference(string $query): bool
+    {
+        return str_starts_with($query, '/') || preg_match('~^https?://~i', $query) === 1;
+    }
+
+    /**
+     * @return array{color: string, message: string}
+     */
+    protected static function check(string $url): array
+    {
+        $result = LiteSpeed::getInstance()->check->check($url);
+
+        return [
+            'color'   => $result['status']->color(),
+            'message' => $result['message'],
+        ];
     }
 }

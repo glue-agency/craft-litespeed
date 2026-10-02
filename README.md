@@ -141,9 +141,9 @@ page early, refuse to store one, or be purged on the server (from the WebAdmin c
 vhost) without Craft knowing. URLs that `.htaccess` folds into one cache entry, such as `?utm_source=…` visits,
 are separate rows. HEAD requests are never recorded: LiteSpeed doesn't store their responses.
 
-A search lists the recorded pages whose URL contains a term, with a **Check** button per row; a term that matches
-nothing can still be checked as a URL. **The check is the real status**: it sends LiteSpeed a HEAD request, which it
-answers from its cache without storing anything, with the row's cookies and the `loopbackOptions`. The answer is
+**Check a page** takes a full URL or a path, checks it, and lists the recorded pages for it; part of a URL only
+searches the record. **The check is the real status**: it sends LiteSpeed a HEAD request, which it answers from its
+cache without storing anything, with the `loopbackOptions` and without cookies, so it checks what a guest gets. The answer is
 *in the cache* (`x-litespeed-cache: hit`), *not in the cache right now* (a public `x-litespeed-cache-control`
 without a hit), *never cached* (`no-cache`), a redirect, or an error. Only URLs on the hosts of this install's
 sites can be checked.

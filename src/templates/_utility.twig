@@ -52,38 +52,36 @@
     <h2>{{ 'Check a page'|t('litespeed') }}</h2>
 
     <form method="get" action="{{ cpUrl('utilities/litespeed') }}">
-        {{ forms.textField({
-            label: 'URL'|t('litespeed'),
-            instructions: 'Search the pages sent to LiteSpeed by URL, or enter the full URL of a page to check it.'|t('litespeed'),
-            id: 'litespeed-query',
-            name: 'q',
-            value: query,
-            placeholder: siteUrl(),
-            code: true,
-        }) }}
+        {% set queryInput %}
+            <div class="flex flex-nowrap">
+                <div class="flex-grow">
+                    {{ forms.text({
+                        id: 'litespeed-query',
+                        name: 'q',
+                        value: query,
+                        placeholder: siteUrl(),
+                        code: true,
+                    }) }}
+                </div>
+                <button type="submit" class="btn submit">{{ 'Check'|t('litespeed') }}</button>
+            </div>
+        {% endset %}
 
-        <div class="buttons">
-            <button type="submit" class="btn submit">{{ 'Search'|t('litespeed') }}</button>
-        </div>
+        {{ forms.field({
+            label: 'URL'|t('litespeed'),
+            instructions: 'Enter a full URL or a path to see whether LiteSpeed has that page in its cache, or part of a URL to search the pages sent to LiteSpeed.'|t('litespeed'),
+            id: 'litespeed-query',
+        }, queryInput) }}
     </form>
 
-    {% if query != '' and pages is empty %}
-        <p>{{ 'No page sent to LiteSpeed matches “{query}”.'|t('litespeed', { query: query }) }}</p>
+    {% if check %}
+        <p class="litespeed-check" role="status">
+            <span class="status {{ check.color }}" aria-hidden="true"></span>{{ check.message }}
+        </p>
+    {% endif %}
 
-        <div class="flex">
-            {{ forms.button({
-                label: 'Check'|t('litespeed'),
-                class: ['litespeed-check'],
-                spinner: true,
-                attributes: {
-                    'aria-controls': 'litespeed-result-query',
-                    data: { url: query, variant: '' },
-                },
-            }) }}
-            <span id="litespeed-result-query" class="litespeed-result" role="status"></span>
-        </div>
-    {% elseif pages is not empty %}
-        <div class="tableview">
+    {% if pages is not empty %}
+        <div class="tableview litespeed-results">
             <table class="data fullwidth">
                 <thead>
                     <tr>
@@ -96,7 +94,6 @@
                         {% endif %}
                         <th scope="col">{{ 'Cached since'|t('litespeed') }}</th>
                         <th scope="col">{{ 'Expires'|t('litespeed') }}</th>
-                        <th scope="col">{{ 'Status'|t('litespeed') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -111,20 +108,6 @@
                             {% endif %}
                             <td class="nowrap">{{ page.dateUpdated|datetime('short') }}</td>
                             <td class="nowrap">{{ page.expiryDate|datetime('short') }}</td>
-                            <td>
-                                <div class="flex flex-nowrap">
-                                    {{ forms.button({
-                                        label: 'Check'|t('litespeed'),
-                                        class: ['small', 'litespeed-check'],
-                                        spinner: true,
-                                        attributes: {
-                                            'aria-controls': "litespeed-result-#{loop.index}",
-                                            data: { url: page.url, variant: page.variant },
-                                        },
-                                    }) }}
-                                    <span id="litespeed-result-{{ loop.index }}" class="litespeed-result" role="status"></span>
-                                </div>
-                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -134,6 +117,8 @@
         {% if pages|length >= limit %}
             <p class="light">{{ 'Showing the {limit} most recently cached matches.'|t('litespeed', { limit: limit }) }}</p>
         {% endif %}
+    {% elseif query != '' %}
+        <p class="litespeed-results">{{ 'No page sent to LiteSpeed matches “{query}”.'|t('litespeed', { query: query }) }}</p>
     {% endif %}
 
     {% if canPurge %}
@@ -143,43 +128,9 @@
     {% endif %}
 </div>
 
-{% js %}
-    (() => {
-        const CheckButtons = Garnish.Base.extend({
-            init(container) {
-                this.addListener($(container).find('.litespeed-check'), 'activate', 'check');
-            },
-
-            check(event) {
-                const $button = $(event.currentTarget);
-                const $result = $('#' + $button.attr('aria-controls'));
-
-                if ($button.hasClass('loading')) {
-                    return;
-                }
-
-                $button.addClass('loading');
-                $result.empty();
-
-                Craft.sendActionRequest('POST', 'litespeed/utility/check', {
-                    data: {
-                        url: $button.attr('data-url'),
-                        variant: $button.attr('data-variant'),
-                    },
-                })
-                    .then(({ data }) => this.show($result, data.color, data.message))
-                    .catch(({ response }) => this.show($result, 'red', response?.data?.message ?? Craft.t('app', 'A server error occurred.')))
-                    .finally(() => $button.removeClass('loading'));
-            },
-
-            show($result, color, message) {
-                $result.empty().append(
-                    $('<span/>', { class: `status ${color}` }),
-                    $('<span/>').text(message),
-                );
-            },
-        });
-
-        new CheckButtons('#litespeed-utility');
-    })();
-{% endjs %}
+{% css %}
+    #litespeed-utility .litespeed-check,
+    #litespeed-utility .litespeed-results {
+        margin-top: 24px;
+    }
+{% endcss %}
