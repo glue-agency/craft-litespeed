@@ -146,9 +146,14 @@ cached while the utility no longer lists them; the check shows the truth.
 
 ## Vary
 
-Logged-in users get a `_lscache_vary` cookie when they log in, which is removed again when they log out.
-LiteSpeed varies on that cookie name without being told to, so a logged-in user never gets a guest's cached
-page. Set `varyLoggedIn` to `false` to turn this off.
+LiteSpeed answers a cached page before Craft runs, so the `no-cache` a site sends to logged-in users only
+helps on pages that aren't cached yet: on a cached URL a logged-in user gets the guests' copy. That's fine while
+pages look the same for everyone. When they don't, turn on `varyLoggedIn` (off by default), or vary on a cookie
+of your own that the site sets at login (see below).
+
+With `varyLoggedIn` on, logged-in users get a `_lscache_vary` cookie when they log in, which is removed again
+when they log out. LiteSpeed varies on that cookie name without being told to, so a logged-in user never gets a
+guest's cached page.
 
 The cookie's name is the `loggedInCookie` setting. LiteSpeed only varies on it unprompted while the name starts
 with `_lscache_vary`; any other name needs a matching rule in `.htaccess`:
@@ -219,7 +224,7 @@ overridden field is shown read-only. The relay's Guzzle options (`loopbackOption
 | `statusTtls` | `[404 => 3600]` | Lifetimes for non-200 responses, by status code. Any other status isn't cached |
 | `excludeUris` | `[]` | Regular expressions matched against the path (without leading slash) |
 | `varyCookies` | `[]` | Cookies every page varies on |
-| `varyLoggedIn` | `true` | Give logged-in users their own cache variant |
+| `varyLoggedIn` | `false` | Give logged-in users their own cache variant |
 | `loggedInCookie` | `_lscache_vary` | Name of the logged-in users' vary cookie |
 | `purgeStale` | `false` | Serve the stale copy while a purged page regenerates |
 | `purgeOnGc` | `true` | Purge the whole site when Craft's garbage collection runs: `php craft gc`, a deploy, and about 1 in 100,000 requests that reach Craft (`gcProbability`) |

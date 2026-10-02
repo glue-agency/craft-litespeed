@@ -53,7 +53,7 @@ class Settings extends Model
     /**
      * Give logged-in users their own vary cookie, so LiteSpeed never serves them a guest page.
      */
-    public bool $varyLoggedIn = true;
+    public bool $varyLoggedIn = false;
 
     /**
      * Name of that cookie. LiteSpeed only varies on it unprompted while it starts with `_lscache_vary`.

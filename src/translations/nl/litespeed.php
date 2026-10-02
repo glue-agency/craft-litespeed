@@ -47,7 +47,7 @@ return [
     'Pattern' => 'Patroon',
     'Vary' => 'Cachevarianten',
     'Separate cache for logged-in users' => 'Aparte cache voor aangemelde gebruikers',
-    'Gives logged-in users a cookie of their own, so LiteSpeed never serves them a guest’s cached page.' => 'Geeft aangemelde gebruikers een eigen cookie, zodat ze van LiteSpeed nooit de gecachete pagina voor gasten te zien krijgen.',
+    'Turn this on when pages look different for logged-in users. They then get a cookie of their own, so LiteSpeed never serves them a guest’s cached page.' => 'Zet dit aan als pagina’s er voor aangemelde gebruikers anders uitzien. Ze krijgen dan een eigen cookie, zodat ze van LiteSpeed nooit de gecachete pagina voor gasten te zien krijgen.',
     'Logged-in cookie name' => 'Cookienaam voor aangemelde gebruikers',
     'LiteSpeed varies on a cookie whose name starts with `_lscache_vary` by itself. Any other name needs `RewriteRule .* - [E="Cache-Vary:<name>"]` in `.htaccess`.' => 'Voor een cookie waarvan de naam met `_lscache_vary` begint, maakt LiteSpeed vanzelf varianten aan. Elke andere naam vereist `RewriteRule .* - [E="Cache-Vary:<name>"]` in `.htaccess`.',
     'Vary cookies' => 'Variantcookies',

@@ -91,26 +91,29 @@
     {% namespace 'settings' %}
         {{ forms.lightswitchField({
             label: 'Separate cache for logged-in users'|t('litespeed'),
-            instructions: 'Gives logged-in users a cookie of their own, so LiteSpeed never serves them a guest’s cached page.'|t('litespeed'),
+            instructions: 'Turn this on when pages look different for logged-in users. They then get a cookie of their own, so LiteSpeed never serves them a guest’s cached page.'|t('litespeed'),
             id: 'varyLoggedIn',
             name: 'varyLoggedIn',
             on: settings.varyLoggedIn,
+            toggle: 'logged-in-cookie',
             disabled: 'varyLoggedIn' in overrides,
             warning: 'varyLoggedIn' in overrides ? overrideWarning,
         }) }}
 
-        {{ forms.textField({
-            label: 'Logged-in cookie name'|t('litespeed'),
-            instructions: 'LiteSpeed varies on a cookie whose name starts with `_lscache_vary` by itself. Any other name needs `RewriteRule .* - [E="Cache-Vary:<name>"]` in `.htaccess`.'|t('litespeed'),
-            id: 'loggedInCookie',
-            name: 'loggedInCookie',
-            value: settings.loggedInCookie,
-            required: true,
-            code: true,
-            disabled: 'loggedInCookie' in overrides,
-            warning: 'loggedInCookie' in overrides ? overrideWarning,
-            errors: settings.getErrors('loggedInCookie'),
-        }) }}
+        <div id="logged-in-cookie"{% if not settings.varyLoggedIn %} class="hidden"{% endif %}>
+            {{ forms.textField({
+                label: 'Logged-in cookie name'|t('litespeed'),
+                instructions: 'LiteSpeed varies on a cookie whose name starts with `_lscache_vary` by itself. Any other name needs `RewriteRule .* - [E="Cache-Vary:<name>"]` in `.htaccess`.'|t('litespeed'),
+                id: 'loggedInCookie',
+                name: 'loggedInCookie',
+                value: settings.loggedInCookie,
+                required: true,
+                code: true,
+                disabled: 'loggedInCookie' in overrides,
+                warning: 'loggedInCookie' in overrides ? overrideWarning,
+                errors: settings.getErrors('loggedInCookie'),
+            }) }}
+        </div>
 
         {{ forms.editableTableField({
             label: 'Vary cookies'|t('litespeed'),
