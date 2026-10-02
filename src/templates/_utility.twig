@@ -1,0 +1,185 @@
+{% import '_includes/forms' as forms %}
+
+{% set sitesById = sites|index('id') %}
+{% set multiSite = sites|length > 1 %}
+{% set noCounts = { pages: 0, urls: 0, variants: 0 } %}
+{% set hasVariants = pages|filter(page => page.variant != '')|length > 0 %}
+
+<div id="litespeed-utility">
+    <h2>{{ 'Pages sent to LiteSpeed for caching'|t('litespeed') }}</h2>
+    <p>{{ 'The pages this website handed to LiteSpeed to keep in its cache, and that haven’t expired yet. LiteSpeed can also drop a page on its own, so check a page below to see whether it really is in the cache.'|t('litespeed') }}</p>
+
+    <div class="tableview">
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    {% if multiSite %}
+                        <th scope="col">{{ 'Site'|t('litespeed') }}</th>
+                    {% endif %}
+                    <th scope="col">{{ 'Pages'|t('litespeed') }}</th>
+                    <th scope="col">{{ 'Unique URLs'|t('litespeed') }}</th>
+                    <th scope="col">{{ 'Cookie variants'|t('litespeed') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if multiSite %}
+                    {% for site in sites %}
+                        {% set counts = stats.sites[site.id] ?? noCounts %}
+                        <tr>
+                            <th scope="row">{{ site.name|t('site') }}</th>
+                            <td>{{ counts.pages|number }}</td>
+                            <td>{{ counts.urls|number }}</td>
+                            <td>{{ counts.variants|number }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                <tr>
+                    {% if multiSite %}
+                        <th scope="row"><strong>{{ 'All sites'|t('litespeed') }}</strong></th>
+                    {% endif %}
+                    <td>{{ stats.total.pages|number }}</td>
+                    <td>{{ stats.total.urls|number }}</td>
+                    <td>{{ stats.total.variants|number }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="light">{{ 'A page that looks different depending on a cookie is kept once per cookie value: each extra version is a cookie variant.'|t('litespeed') }}</p>
+
+    <hr>
+
+    <h2>{{ 'Check a page'|t('litespeed') }}</h2>
+
+    <form method="get" action="{{ cpUrl('utilities/litespeed') }}">
+        {{ forms.textField({
+            label: 'URL'|t('litespeed'),
+            instructions: 'Search the pages sent to LiteSpeed by URL, or enter the full URL of a page to check it.'|t('litespeed'),
+            id: 'litespeed-query',
+            name: 'q',
+            value: query,
+            placeholder: siteUrl(),
+            code: true,
+        }) }}
+
+        <div class="buttons">
+            <button type="submit" class="btn submit">{{ 'Search'|t('litespeed') }}</button>
+        </div>
+    </form>
+
+    {% if query != '' and pages is empty %}
+        <p>{{ 'No page sent to LiteSpeed matches “{query}”.'|t('litespeed', { query: query }) }}</p>
+
+        <div class="flex">
+            {{ forms.button({
+                label: 'Check'|t('litespeed'),
+                class: ['litespeed-check'],
+                spinner: true,
+                attributes: {
+                    'aria-controls': 'litespeed-result-query',
+                    data: { url: query, variant: '' },
+                },
+            }) }}
+            <span id="litespeed-result-query" class="litespeed-result" role="status"></span>
+        </div>
+    {% elseif pages is not empty %}
+        <div class="tableview">
+            <table class="data fullwidth">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ 'URL'|t('litespeed') }}</th>
+                        {% if multiSite %}
+                            <th scope="col">{{ 'Site'|t('litespeed') }}</th>
+                        {% endif %}
+                        {% if hasVariants %}
+                            <th scope="col">{{ 'Cookies'|t('litespeed') }}</th>
+                        {% endif %}
+                        <th scope="col">{{ 'Cached since'|t('litespeed') }}</th>
+                        <th scope="col">{{ 'Expires'|t('litespeed') }}</th>
+                        <th scope="col">{{ 'Status'|t('litespeed') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for page in pages %}
+                        <tr>
+                            <td class="code break-word">{{ page.url }}</td>
+                            {% if multiSite %}
+                                <td>{{ sitesById[page.siteId].name|t('site') }}</td>
+                            {% endif %}
+                            {% if hasVariants %}
+                                <td class="code break-word">{{ page.variant }}</td>
+                            {% endif %}
+                            <td class="nowrap">{{ page.dateUpdated|datetime('short') }}</td>
+                            <td class="nowrap">{{ page.expiryDate|datetime('short') }}</td>
+                            <td>
+                                <div class="flex flex-nowrap">
+                                    {{ forms.button({
+                                        label: 'Check'|t('litespeed'),
+                                        class: ['small', 'litespeed-check'],
+                                        spinner: true,
+                                        attributes: {
+                                            'aria-controls': "litespeed-result-#{loop.index}",
+                                            data: { url: page.url, variant: page.variant },
+                                        },
+                                    }) }}
+                                    <span id="litespeed-result-{{ loop.index }}" class="litespeed-result" role="status"></span>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pages|length >= limit %}
+            <p class="light">{{ 'Showing the {limit} most recently cached matches.'|t('litespeed', { limit: limit }) }}</p>
+        {% endif %}
+    {% endif %}
+
+    {% if canPurge %}
+        <hr>
+
+        <a class="btn" href="{{ cpUrl('litespeed') }}">{{ 'Purge LiteSpeed cache'|t('litespeed') }}</a>
+    {% endif %}
+</div>
+
+{% js %}
+    (() => {
+        const CheckButtons = Garnish.Base.extend({
+            init(container) {
+                this.addListener($(container).find('.litespeed-check'), 'activate', 'check');
+            },
+
+            check(event) {
+                const $button = $(event.currentTarget);
+                const $result = $('#' + $button.attr('aria-controls'));
+
+                if ($button.hasClass('loading')) {
+                    return;
+                }
+
+                $button.addClass('loading');
+                $result.empty();
+
+                Craft.sendActionRequest('POST', 'litespeed/utility/check', {
+                    data: {
+                        url: $button.attr('data-url'),
+                        variant: $button.attr('data-variant'),
+                    },
+                })
+                    .then(({ data }) => this.show($result, data.color, data.message))
+                    .catch(({ response }) => this.show($result, 'red', response?.data?.message ?? Craft.t('app', 'A server error occurred.')))
+                    .finally(() => $button.removeClass('loading'));
+            },
+
+            show($result, color, message) {
+                $result.empty().append(
+                    $('<span/>', { class: `status ${color}` }),
+                    $('<span/>').text(message),
+                );
+            },
+        });
+
+        new CheckButtons('#litespeed-utility');
+    })();
+{% endjs %}

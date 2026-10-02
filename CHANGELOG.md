@@ -9,4 +9,6 @@
 - Add a CP section to purge URLs (with their sub-pages, so a site's base URL purges the whole site) and custom tags
 - Add CP settings for the cache lifetimes, excluded paths, vary cookies, the logged-in cookie's name (`loggedInCookie`) and purging; `config/litespeed.php` overrides them
 - Add `litespeed/purge/all`, `litespeed/purge/urls` and `litespeed/purge/tags` console commands, and a Clear Caches option
+- Add a LiteSpeed utility: how many pages were sent to LiteSpeed for caching (per site, with unique URLs and cookie variants), a search over them, and a live check that asks LiteSpeed whether a URL really is cached
+- Record every page handed to LiteSpeed in the `litespeed_pages` and `litespeed_pagetags` tables, forgetting it when it's purged or expires
 - Dutch, French and German translations

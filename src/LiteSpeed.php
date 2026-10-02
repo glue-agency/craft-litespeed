@@ -7,6 +7,7 @@ use craft\base\Model;
 use craft\base\Plugin;
 use craft\events\InvalidateElementCachesEvent;
 use craft\events\RegisterCacheOptionsEvent;
+use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterTemplateRootsEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
@@ -15,6 +16,7 @@ use craft\log\MonologTarget;
 use craft\services\Elements;
 use craft\services\Gc;
 use craft\services\UserPermissions;
+use craft\services\Utilities;
 use craft\utilities\ClearCaches;
 use craft\web\Response;
 use craft\web\twig\variables\CraftVariable;
@@ -23,7 +25,10 @@ use craft\web\View;
 use GlueAgency\LiteSpeed\enums\Permission;
 use GlueAgency\LiteSpeed\models\Settings;
 use GlueAgency\LiteSpeed\services\CacheService;
+use GlueAgency\LiteSpeed\services\CheckService;
 use GlueAgency\LiteSpeed\services\PurgeService;
+use GlueAgency\LiteSpeed\services\TrackerService;
+use GlueAgency\LiteSpeed\utilities\CacheUtility;
 use GlueAgency\LiteSpeed\web\twig\LiteSpeedVariable;
 use Monolog\Formatter\LineFormatter;
 use Psr\Log\LogLevel;
@@ -35,7 +40,9 @@ use yii\queue\Queue;
  * LiteSpeed Cache integration: cache control, tags, vary and purging.
  *
  * @property-read CacheService $cache
+ * @property-read CheckService $check
  * @property-read PurgeService $purge
+ * @property-read TrackerService $tracker
  *
  * @method static LiteSpeed getInstance()
  * @method Settings getSettings()
@@ -46,7 +53,7 @@ use yii\queue\Queue;
  */
 class LiteSpeed extends Plugin
 {
-    public string $schemaVersion = '1.0.0';
+    public string $schemaVersion = '1.1.0';
 
     public bool $hasCpSection = true;
 
@@ -56,8 +63,10 @@ class LiteSpeed extends Plugin
     {
         return [
             'components' => [
-                'cache' => CacheService::class,
-                'purge' => PurgeService::class,
+                'cache'   => CacheService::class,
+                'check'   => CheckService::class,
+                'purge'   => PurgeService::class,
+                'tracker' => TrackerService::class,
             ],
         ];
     }
@@ -76,6 +85,8 @@ class LiteSpeed extends Plugin
             $this->registerCpTemplateRoots();
             $this->registerCpRoutes();
             $this->registerPermissions();
+            $this->registerUtility();
+            $this->registerTrackerCleanup();
 
             if ($this->getSettings()->isEnabled()) {
                 $this->registerCacheOptions();
@@ -186,6 +197,21 @@ class LiteSpeed extends Plugin
         });
     }
 
+    protected function registerUtility(): void
+    {
+        Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES, function(RegisterComponentTypesEvent $event) {
+            $event->types[] = CacheUtility::class;
+        });
+    }
+
+    /**
+     * The record outlives a disabled plugin, so its expired pages are cleaned up either way.
+     */
+    protected function registerTrackerCleanup(): void
+    {
+        Event::on(Gc::class, Gc::EVENT_RUN, fn() => $this->tracker->deleteExpired());
+    }
+
     protected function registerCacheOptions(): void
     {
         Event::on(ClearCaches::class, ClearCaches::EVENT_REGISTER_CACHE_OPTIONS, function(RegisterCacheOptionsEvent $event) {
@@ -231,6 +257,9 @@ class LiteSpeed extends Plugin
             $this->cache->prepareResponse($event->sender);
         });
 
-        Event::on(Response::class, Response::EVENT_AFTER_SEND, fn() => $this->purge->relay());
+        Event::on(Response::class, Response::EVENT_AFTER_SEND, function() {
+            $this->tracker->record();
+            $this->purge->relay();
+        });
     }
 }

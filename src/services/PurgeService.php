@@ -11,6 +11,7 @@ use craft\helpers\Queue;
 use craft\web\Response;
 use GlueAgency\LiteSpeed\enums\Header;
 use GlueAgency\LiteSpeed\helpers\Tags;
+use GlueAgency\LiteSpeed\helpers\Urls;
 use GlueAgency\LiteSpeed\jobs\PurgeJob;
 use GlueAgency\LiteSpeed\LiteSpeed;
 use GuzzleHttp\Client;
@@ -154,6 +155,7 @@ class PurgeService extends Component
 
         if ($value !== null) {
             $response->getHeaders()->set(Header::PURGE->value, $value);
+            LiteSpeed::getInstance()->tracker->forget($chunks[0], $this->everything);
             Craft::info("Purging {$value}", 'litespeed');
         }
 
@@ -353,47 +355,18 @@ class PurgeService extends Component
      */
     protected function parseUrl(string $url): ?array
     {
-        $url = trim($url);
+        $url = Urls::absolute($url, Urls::defaultOrigin());
 
-        if ($url === '') {
+        if ($url === null) {
             return null;
-        }
-
-        if (str_starts_with($url, '//')) {
-            $url = 'https:' . $url;
-        } elseif (str_starts_with($url, '/')) {
-            $url = rtrim($this->defaultOrigin(), '/') . $url;
-        } elseif (! preg_match('~^https?://~i', $url)) {
-            $url = 'https://' . $url;
         }
 
         $parts = parse_url($url);
-
-        if (empty($parts['host'])) {
-            return null;
-        }
 
         return [
             'host' => $parts['host'],
             'path' => $parts['path'] ?? '/',
         ];
-    }
-
-    protected function defaultOrigin(): string
-    {
-        $request = Craft::$app->getRequest();
-
-        if (! $request->getIsConsoleRequest() && $request->getIsSiteRequest()) {
-            return $request->getHostInfo();
-        }
-
-        $parts = parse_url(Craft::$app->getSites()->getPrimarySite()->getBaseUrl() ?? '');
-
-        if (empty($parts['host'])) {
-            return '';
-        }
-
-        return ($parts['scheme'] ?? 'https') . '://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
     }
 
     protected function prefix(): string

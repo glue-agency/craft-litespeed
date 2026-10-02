@@ -8,6 +8,7 @@ use craft\helpers\ConfigHelper;
 use craft\web\Request;
 use craft\web\Response;
 use GlueAgency\LiteSpeed\enums\Header;
+use GlueAgency\LiteSpeed\helpers\Pages;
 use GlueAgency\LiteSpeed\helpers\Tags;
 use GlueAgency\LiteSpeed\LiteSpeed;
 use GlueAgency\LiteSpeed\models\Settings;
@@ -99,6 +100,8 @@ class CacheService extends Component
                 $this->sendVary($response);
             }
 
+            $this->remember($request, $response);
+
             return;
         }
 
@@ -112,17 +115,58 @@ class CacheService extends Component
 
         $headers->set(Header::CACHE_CONTROL->value, "public,max-age={$maxAge}");
         $this->sendVary($response);
+        $this->remember($request, $response);
     }
 
     protected function sendVary(Response $response): void
     {
-        $varyCookies = array_values(array_unique(array_merge(LiteSpeed::getInstance()->getSettings()->varyCookies, $this->varyCookies)));
+        $varyCookies = $this->varyCookies();
 
         if (empty($varyCookies)) {
             return;
         }
 
         $response->getHeaders()->set(Header::VARY->value, implode(',', array_map(fn(string $name) => "cookie={$name}", $varyCookies)));
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function varyCookies(): array
+    {
+        return array_values(array_unique(array_merge(LiteSpeed::getInstance()->getSettings()->varyCookies, $this->varyCookies)));
+    }
+
+    /**
+     * Hands the page to the tracker when the headers as sent let LiteSpeed store it. LiteSpeed doesn't store HEAD
+     * responses.
+     */
+    protected function remember(Request $request, Response $response): void
+    {
+        if (! $request->getIsGet() || ! $request->getIsSiteRequest()) {
+            return;
+        }
+
+        $headers = $response->getHeaders();
+        $maxAge = Pages::maxAge((string) $headers->get(Header::CACHE_CONTROL->value));
+
+        if ($maxAge === null) {
+            return;
+        }
+
+        $cookies = [];
+
+        foreach ($request->getRawCookies() as $cookie) {
+            $cookies[$cookie->name] = (string) $cookie->value;
+        }
+
+        LiteSpeed::getInstance()->tracker->remember(
+            siteId: Craft::$app->getSites()->getCurrentSite()->id,
+            url: $request->getAbsoluteUrl(),
+            variant: Pages::variant($this->varyCookies(), $cookies),
+            maxAge: $maxAge,
+            tags: Pages::tags((string) $headers->get(Header::TAG->value)),
+        );
     }
 
     protected function isCandidate(Request $request): bool

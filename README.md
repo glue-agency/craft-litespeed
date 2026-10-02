@@ -10,6 +10,7 @@ same response headers.
   `X-LiteSpeed-Purge`. That also works from the queue and from console commands.
 - Logged-in users and cookie-dependent pages get their own cache variant through `X-LiteSpeed-Vary`.
 - A CP section purges URLs or tags by hand, and so do the console and the Clear Caches utility.
+- A utility shows how many pages were handed to LiteSpeed, and asks LiteSpeed whether a given URL is cached.
 - Every setting can be managed in the CP, or per environment through `config/litespeed.php`.
 
 ## Requirements
@@ -120,6 +121,29 @@ The relay is authenticated with Craft's `securityKey`, so the web and console pr
 The **LiteSpeed** section purges one or more URLs, optionally with all their sub-pages. To purge a whole
 site, enter its base URL and tick "Purge all sub-pages". The **Purge tags** permission adds the Tags tab.
 
+## Utility
+
+*Utilities → LiteSpeed* has two parts, behind Craft's own permission for the utility.
+
+**Pages sent to LiteSpeed for caching** counts the plugin's own record, per site: every GET response it sent with
+`X-LiteSpeed-Cache-Control: public,max-age=N` is stored with its URL (query string included), cookie variant, tags
+and expiry. A purge removes the pages it reaches, and Craft's garbage collection removes expired ones. LiteSpeed
+can't list what it holds, so this is what the plugin handed over, not what LiteSpeed kept: LiteSpeed can evict a
+page early, refuse to store one, or be purged on the server (from the WebAdmin console, or by another app on the
+vhost) without Craft knowing. URLs that `.htaccess` folds into one cache entry, such as `?utm_source=…` visits,
+are separate rows. HEAD requests are never recorded: LiteSpeed doesn't store their responses.
+
+A search lists the recorded pages whose URL contains a term, with a **Check** button per row; a term that matches
+nothing can still be checked as a URL. **The check is the real status**: it sends LiteSpeed a HEAD request, which it
+answers from its cache without storing anything, with the row's cookies and the `loopbackOptions`. The answer is
+*in the cache* (`x-litespeed-cache: hit`), *not in the cache right now* (a public `x-litespeed-cache-control`
+without a hit), *never cached* (`no-cache`), a redirect, or an error. Only URLs on the hosts of this install's
+sites can be checked.
+
+On a multi-domain install, a purge from a web request only reaches the vhost that served it (see
+[Caveats](#caveats)), but it removes the matching rows for every host. The other domains' pages can then still be
+cached while the utility no longer lists them; the check shows the truth.
+
 ## Vary
 
 Logged-in users get a `_lscache_vary` cookie when they log in, which is removed again when they log out.
@@ -224,6 +248,8 @@ Everything the plugin does goes to `storage/logs/litespeed-<date>.log`:
   request, split over a queue job.
 - `[WARNING] Too many cache tags for <path>, not caching it.`: the page-side `maxHeaderLength` fallback. A page
   that falls back to per-type tags is logged at `[INFO]`.
+- `[WARNING] Couldn’t record <url> as sent to LiteSpeed: …`: the utility's record of a page couldn't be written.
+  The page itself is unaffected.
 
 LiteSpeed itself doesn't acknowledge a purge, so the log shows what was sent, not what LiteSpeed did with it. To
 confirm, request the page again: `x-litespeed-cache: miss` means it was purged.
