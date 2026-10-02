@@ -3,6 +3,7 @@
 namespace GlueAgency\LiteSpeed\controllers;
 
 use Craft;
+use craft\helpers\Cp;
 use craft\web\Controller;
 use GlueAgency\LiteSpeed\LiteSpeed;
 use GlueAgency\LiteSpeed\models\Settings;
@@ -19,7 +20,7 @@ class SettingsController extends Controller
             return false;
         }
 
-        $this->requireAdmin();
+        $this->requireAdmin(false);
 
         return true;
     }
@@ -27,13 +28,12 @@ class SettingsController extends Controller
     public function actionEdit(?Settings $settings = null): Response
     {
         $plugin = LiteSpeed::getInstance();
+        $readOnly = ! Craft::$app->getConfig()->getGeneral()->allowAdminChanges;
 
-        return $this->asCpScreen()
+        $response = $this->asCpScreen()
             ->title(Craft::t('litespeed', 'Settings'))
             ->addCrumb(Craft::t('litespeed', 'LiteSpeed'), 'litespeed')
             ->selectedSubnavItem('settings')
-            ->action('litespeed/settings/save')
-            ->redirectUrl('litespeed/settings')
             ->tabs([
                 'general' => ['label' => Craft::t('litespeed', 'General'), 'url' => '#general'],
                 'caching' => ['label' => Craft::t('litespeed', 'Caching'), 'url' => '#caching'],
@@ -43,12 +43,27 @@ class SettingsController extends Controller
             ->contentTemplate('litespeed/settings', [
                 'settings'  => $settings ?? $plugin->getSettings(),
                 'overrides' => array_keys(Craft::$app->getConfig()->getConfigFromFile($plugin->handle)),
+                'readOnly'  => $readOnly,
             ]);
+
+        if (! $readOnly) {
+            return $response
+                ->action('litespeed/settings/save')
+                ->redirectUrl('litespeed/settings');
+        }
+
+        // Craft 5.6+
+        if (method_exists(Cp::class, 'readOnlyNoticeHtml')) {
+            $response->noticeHtml(Cp::readOnlyNoticeHtml());
+        }
+
+        return $response;
     }
 
     public function actionSave(): ?Response
     {
         $this->requirePostRequest();
+        $this->requireAdmin();
 
         $plugin = LiteSpeed::getInstance();
 

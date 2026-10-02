@@ -1,5 +1,6 @@
 {% import '_includes/forms' as forms %}
 
+{% set readOnly = readOnly ?? false %}
 {% set overrideWarning = 'This is overridden by config/litespeed.php.'|t('litespeed') %}
 {% set serverRulesUrl = 'https://github.com/glue-agency/craft-litespeed#server-rules' %}
 
@@ -13,7 +14,7 @@
             name: 'enabled',
             value: settings.enabled is same as(true) ? '1' : settings.enabled,
             includeEnvVars: true,
-            disabled: 'enabled' in overrides,
+            disabled: readOnly or 'enabled' in overrides,
             warning: 'enabled' in overrides ? overrideWarning,
         }) }}
 
@@ -25,7 +26,7 @@
             name: 'prefix',
             value: settings.prefix,
             suggestEnvVars: true,
-            disabled: 'prefix' in overrides,
+            disabled: readOnly or 'prefix' in overrides,
             warning: 'prefix' in overrides ? overrideWarning : 'Pages cached under the old prefix can’t be purged any more once it changes; they live until their TTL runs out.'|t('litespeed'),
             errors: settings.getErrors('prefix'),
         }) }}
@@ -43,7 +44,7 @@
             min: 0,
             size: 8,
             value: settings.ttl,
-            disabled: 'ttl' in overrides,
+            disabled: readOnly or 'ttl' in overrides,
             warning: 'ttl' in overrides ? overrideWarning,
             errors: settings.getErrors('ttl'),
         }) }}
@@ -65,7 +66,7 @@
             rows: statusRows,
             allowAdd: true,
             allowDelete: true,
-            static: 'statusTtls' in overrides,
+            static: readOnly or 'statusTtls' in overrides,
             warning: 'statusTtls' in overrides ? overrideWarning,
             errors: settings.getErrors('statusTtls'),
         }) }}
@@ -81,7 +82,7 @@
             rows: settings.excludeUris|map(pattern => { pattern: pattern }),
             allowAdd: true,
             allowDelete: true,
-            static: 'excludeUris' in overrides,
+            static: readOnly or 'excludeUris' in overrides,
             warning: 'excludeUris' in overrides ? overrideWarning,
             errors: settings.getErrors('excludeUris'),
         }) }}
@@ -97,7 +98,7 @@
             name: 'varyLoggedIn',
             on: settings.varyLoggedIn,
             toggle: 'logged-in-cookie',
-            disabled: 'varyLoggedIn' in overrides,
+            disabled: readOnly or 'varyLoggedIn' in overrides,
             warning: 'varyLoggedIn' in overrides ? overrideWarning,
         }) }}
 
@@ -110,7 +111,7 @@
                 value: settings.loggedInCookie,
                 required: true,
                 code: true,
-                disabled: 'loggedInCookie' in overrides,
+                disabled: readOnly or 'loggedInCookie' in overrides,
                 warning: 'loggedInCookie' in overrides ? overrideWarning,
                 errors: settings.getErrors('loggedInCookie'),
             }) }}
@@ -127,7 +128,7 @@
             rows: settings.varyCookies|map(name => { name: name }),
             allowAdd: true,
             allowDelete: true,
-            static: 'varyCookies' in overrides,
+            static: readOnly or 'varyCookies' in overrides,
             warning: 'varyCookies' in overrides ? overrideWarning,
             errors: settings.getErrors('varyCookies'),
         }) }}
@@ -142,7 +143,7 @@
             id: 'purgeStale',
             name: 'purgeStale',
             on: settings.purgeStale,
-            disabled: 'purgeStale' in overrides,
+            disabled: readOnly or 'purgeStale' in overrides,
             warning: 'purgeStale' in overrides ? overrideWarning,
         }) }}
 
@@ -152,7 +153,7 @@
             id: 'purgeOnGc',
             name: 'purgeOnGc',
             on: settings.purgeOnGc,
-            disabled: 'purgeOnGc' in overrides,
+            disabled: readOnly or 'purgeOnGc' in overrides,
             warning: 'purgeOnGc' in overrides ? overrideWarning,
         }) }}
     {% endnamespace %}

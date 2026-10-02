@@ -59,6 +59,8 @@ class LiteSpeed extends Plugin
 
     public bool $hasCpSettings = true;
 
+    public bool $hasReadOnlyCpSettings = true;
+
     public static function config(): array
     {
         return [
@@ -109,6 +111,11 @@ class LiteSpeed extends Plugin
         return Craft::$app->getResponse()->redirect(UrlHelper::cpUrl('litespeed/settings'));
     }
 
+    public function getReadOnlySettingsResponse(): mixed
+    {
+        return $this->getSettingsResponse();
+    }
+
     public function getCpNavItem(): ?array
     {
         $item = parent::getCpNavItem();
@@ -122,7 +129,7 @@ class LiteSpeed extends Plugin
 
         $user = Craft::$app->getUser()->getIdentity();
 
-        if ($user?->admin && Craft::$app->getConfig()->getGeneral()->allowAdminChanges) {
+        if ($user?->admin) {
             $item['subnav']['settings'] = [
                 'label' => Craft::t('litespeed', 'Settings'),
                 'url'   => 'litespeed/settings',

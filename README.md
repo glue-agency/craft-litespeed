@@ -229,7 +229,7 @@ its tags.
 ## Settings
 
 Everything below can be set under *LiteSpeed → Settings*, which admins see in the section's nav (*Settings →
-Plugins → LiteSpeed* leads there too). The CP saves to project config, so it's only editable where `allowAdminChanges` is on. To set a value per
+Plugins → LiteSpeed* leads there too). The CP saves to project config, so it's only editable where `allowAdminChanges` is on; elsewhere admins see it read-only. To set a value per
 environment, enter an environment variable such as `$LITESPEED_ENABLED` or `$LITESPEED_PREFIX` (`enabled`
 and `prefix` accept one), or set it in `config/litespeed.php`, which overrides the CP: an overridden field is
 shown read-only. The relay settings (`loopbackUrls`, `loopbackOptions`) and `maxHeaderLength` are config-file only.
