@@ -146,6 +146,8 @@ cached while the utility no longer lists them; the check shows the truth.
 
 ## Vary
 
+### Logged-in users
+
 LiteSpeed answers a cached page before Craft runs, so the `no-cache` a site sends to logged-in users only
 helps on pages that aren't cached yet: on a cached URL a logged-in user gets the guests' copy. That's fine while
 pages look the same for everyone. When they don't, turn on `varyLoggedIn` (off by default), or vary on a cookie
@@ -153,16 +155,10 @@ of your own that the site sets at login (see below).
 
 With `varyLoggedIn` on, logged-in users get a `_lscache_vary` cookie when they log in, which is removed again
 when they log out. LiteSpeed varies on that cookie name without being told to, so a logged-in user never gets a
-guest's cached page.
+guest's cached page. The cookie's name is the `loggedInCookie` setting; a name that doesn't start with
+`_lscache_vary` needs a [server rule](#server-rules).
 
-The cookie's name is the `loggedInCookie` setting. LiteSpeed only varies on it unprompted while the name starts
-with `_lscache_vary`; any other name needs a matching rule in `.htaccess`:
-
-```apache
-<IfModule LiteSpeed>
-    RewriteRule .* - [E="Cache-Vary:my_vary_cookie"]
-</IfModule>
-```
+### Cookies of your own
 
 When a page renders differently depending on a cookie of your own, cache a variant per cookie value. Either for
 the whole site:
@@ -180,14 +176,28 @@ or only on the pages that read it:
 {% do craft.litespeed.varyCookie('customer_group') %}
 ```
 
-That sends `X-LiteSpeed-Vary: cookie=customer_group`. Add the same cookie to the cache lookup in
-`.htaccess`, so LiteSpeed takes it into account before it serves a cached page:
+That sends `X-LiteSpeed-Vary: cookie=customer_group`. Each of these cookies also needs a
+[server rule](#server-rules).
+
+### Server rules
+
+LiteSpeed looks up a cached page before Craft runs, so it has to know the vary cookies up front.
+
+**LiteSpeed Web Server** reads them from `web/.htaccess`, in Apache syntax. List every cookie in one rule,
+separated by commas: `E=` sets the variable, so a second `Cache-Vary` rule overwrites the first instead of adding
+to it. A `loggedInCookie` that doesn't start with `_lscache_vary` goes in the same list.
 
 ```apache
 <IfModule LiteSpeed>
-    RewriteRule .* - [E=Cache-Vary:customer_group]
+    RewriteRule .* - [E="Cache-Vary:customer_group,my_vary_cookie"]
 </IfModule>
 ```
+
+**OpenLiteSpeed** reads the same rule, but only when the virtual host has *Auto Load from .htaccess* on, and it
+picks up changes to `.htaccess` after a graceful restart.
+
+**nginx** needs nothing. The cache runs inside LiteSpeed: an nginx proxy in front of it, as on Combell, passes
+the cookies through, and a server that only runs nginx has no LiteSpeed cache at all.
 
 ## Templates
 
