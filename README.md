@@ -91,7 +91,7 @@ or per form: `{{ csrfInput({ async: true }) }}`.
 | Element saved, deleted, restored, moved or propagated | The pages that showed it, and the element's own URL |
 | Section, entry type, volume, field, site or global set changed | Every page that queried that kind of element; for fields, sites and globals, the whole site |
 | Drafts and revisions | Nothing |
-| Craft's garbage collection | Nothing, unless `purgeOnGc` is on |
+| Craft's garbage collection | The whole site, unless `purgeOnGc` is off |
 | `php craft litespeed/purge/all` or *Utilities → Clear Caches → LiteSpeed cache* | The whole site |
 | `php craft litespeed/purge/all --everything` | The entire LiteSpeed cache, including other apps on the same vhost |
 | `php craft litespeed/purge/urls <url>... [--subpages]` | Those URLs, and with `--subpages` everything below them |
@@ -222,7 +222,7 @@ overridden field is shown read-only. The relay's Guzzle options (`loopbackOption
 | `varyLoggedIn` | `true` | Give logged-in users their own cache variant |
 | `loggedInCookie` | `_lscache_vary` | Name of the logged-in users' vary cookie |
 | `purgeStale` | `false` | Serve the stale copy while a purged page regenerates |
-| `purgeOnGc` | `false` | Purge everything after garbage collection |
+| `purgeOnGc` | `true` | Purge the whole site when Craft's garbage collection runs: `php craft gc`, a deploy, and about 1 in 100,000 requests that reach Craft (`gcProbability`) |
 | `loopbackUrls` | each host's first site URL | Where console and queue purges are relayed to. The URL must answer the POST itself, without a redirect |
 | `loopbackOptions` | `[]` | Guzzle options for that relay request, merged over a 10 second timeout and no redirects. Config file only |
 | `maxHeaderLength` | `8000` | Longest tag or purge header sent, in bytes. Config file only |

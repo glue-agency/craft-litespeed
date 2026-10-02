@@ -66,9 +66,9 @@ class Settings extends Model
     public bool $purgeStale = false;
 
     /**
-     * Purge everything when Craft's garbage collection invalidates all element caches.
+     * Purge everything when Craft's garbage collection runs, which invalidates all element caches.
      */
-    public bool $purgeOnGc = false;
+    public bool $purgeOnGc = true;
 
     /**
      * URLs purges are relayed to when they happen outside a web response (console, queue).

@@ -143,8 +143,8 @@
         }) }}
 
         {{ forms.lightswitchField({
-            label: 'Purge after garbage collection'|t('litespeed'),
-            instructions: 'Craft’s garbage collection invalidates every element cache, without any content having changed.'|t('litespeed'),
+            label: 'Purge on garbage collection'|t('litespeed'),
+            instructions: 'Clears every page LiteSpeed cached for this site whenever Craft’s garbage collection runs, for example during a deploy.'|t('litespeed'),
             id: 'purgeOnGc',
             name: 'purgeOnGc',
             on: settings.purgeOnGc,
