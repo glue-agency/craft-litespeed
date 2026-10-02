@@ -289,4 +289,5 @@ confirm, request the page again: `x-litespeed-cache: miss` means it was purged.
 - **Copied databases.** The default prefix comes from the system UID, so a staging site built from a
   production database shares production's prefix. That's harmless while each runs on its own vhost; set
   `prefix` when two of them share one.
-- **Not yet supported:** private cache for logged-in users and ESI. Logged-in users are never cached.
+- **Not yet supported:** private cache for logged-in users and ESI. Logged-in users are never cached. The design,
+  and what we found out about LiteSpeed along the way, is in [roadmap/esi.md](roadmap/esi.md).
